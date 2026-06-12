@@ -1,0 +1,28 @@
+# ── Configuração local do banco (não versionar credenciais) ──
+config/database.php
+
+# ── Dependências ──
+vendor/
+node_modules/
+
+# ── Arquivos de sistema ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editores e IDEs ──
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# ── Logs e temporários ──
+*.log
+*.tmp
+*.cache
+
+# ── Arquivo de setup (apagar após executar) ──
+setup.php

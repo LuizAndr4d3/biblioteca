@@ -1,81 +1,29 @@
-# 📚 Sistema de Gerenciamento de Biblioteca
+# 📚 BiblioSys — Sistema de Gerenciamento de Biblioteca
 
-Sistema web desenvolvido em **PHP 8+** com **MySQL**, utilizando orientação a objetos e padrão MVC simplificado. Permite o controle completo do acervo de uma biblioteca: cadastro de livros, autores, categorias, usuários e gerenciamento de empréstimos.
-
----
-
-## 🗂️ Estrutura do Projeto
-
-```
-biblioteca/
-├── config/
-│   ├── database.php       # Configuração PDO da conexão com MySQL
-│   └── layout.php         # Funções de layout, alertas e redirecionamento
-├── classes/
-│   ├── Categoria.php      # Classe de categorias dos livros
-│   ├── Autor.php          # Classe de autores
-│   ├── Livro.php          # Classe do acervo de livros
-│   ├── Usuario.php        # Classe de membros/usuários da biblioteca
-│   └── Emprestimo.php     # Classe de empréstimos e devoluções
-├── pages/
-│   ├── categorias/        # CRUD de categorias
-│   ├── autores/           # CRUD de autores
-│   ├── livros/            # CRUD de livros
-│   ├── usuarios/          # CRUD de usuários
-│   └── emprestimos/       # CRUD de empréstimos + devolução
-├── database.sql           # Script SQL completo
-└── index.php              # Dashboard principal
-```
+> Projeto Final — Sistema Web em PHP com MySQL
 
 ---
 
-## ⚙️ Requisitos
+## 📋 Descrição do Sistema
 
-- PHP 8.1+
-- MySQL 8.0+ (ou MariaDB 10.6+)
-- Servidor web: Apache / Nginx (ou `php -S localhost:8000`)
-- Extensão PDO e pdo_mysql habilitadas
+O **BiblioSys** é um sistema web completo de gerenciamento de biblioteca desenvolvido em **PHP 8** orientado a objetos com banco de dados **MySQL**. O sistema permite o controle do acervo de livros, cadastro de autores e categorias, gerenciamento de usuários e todo o ciclo de empréstimos e devoluções.
 
----
+O sistema possui dois perfis de acesso distintos:
 
-## 🚀 Instalação
-
-**1. Clone ou copie a pasta `biblioteca/` para o seu servidor web.**
-
-**2. Crie o banco de dados:**
-```bash
-mysql -u root -p < database.sql
-```
-
-**3. Configure a conexão em `config/database.php`:**
-```php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'biblioteca_db');
-define('DB_USER', 'root');
-define('DB_PASS', 'sua_senha');
-```
-
-**4. Acesse no navegador:**
-```
-http://localhost/biblioteca/
-```
-
-> Para desenvolvimento rápido com PHP built-in server:
-> ```bash
-> php -S localhost:8000 -t biblioteca/
-> ```
+- **Administrador** — acesso completo ao gerenciamento do acervo, usuários e empréstimos
+- **Leitor** — acessa o catálogo, solicita empréstimos e acompanha seus próprios livros
 
 ---
 
-## 📋 Classes e Operações CRUD
+## 🛠️ Tecnologias Utilizadas
 
-| Classe        | Criar | Listar | Buscar | Atualizar | Deletar | Extra                          |
-|---------------|:-----:|:------:|:------:|:---------:|:-------:|-------------------------------|
-| `Categoria`   | ✅    | ✅     | ✅     | ✅        | ✅      | Proteção: livros vinculados    |
-| `Autor`       | ✅    | ✅     | ✅     | ✅        | ✅      | Proteção: livros vinculados    |
-| `Livro`       | ✅    | ✅     | ✅     | ✅        | ✅      | Verificação de disponibilidade |
-| `Usuario`     | ✅    | ✅     | ✅     | ✅        | ✅      | Controle de status ativo/inativo |
-| `Emprestimo`  | ✅    | ✅     | ✅     | ✅        | ✅      | Devolução, detecção de atraso  |
+| Tecnologia | Versão | Uso |
+|---|---|---|
+| PHP | 8.1+ | Back-end, OOP, PDO |
+| MySQL | 8.0+ | Banco de dados relacional |
+| Bootstrap | 5.3 | Interface responsiva |
+| Bootstrap Icons | 1.11 | Ícones da interface |
+| Apache | XAMPP | Servidor web local |
 
 ---
 
@@ -119,7 +67,7 @@ classDiagram
         +criar(titulo, isbn, ano, qtd, catId, autId) bool
         +listarTodos() array
         +buscarPorId(id) array
-        +atualizar(id, titulo, isbn, ano, qtd, catId, autId) bool
+        +atualizar(id, ...) bool
         +deletar(id) bool
         +verificarDisponibilidade(id) bool
         +total() int
@@ -129,13 +77,15 @@ classDiagram
         +int id
         +string nome
         +string email
-        +string telefone
+        +string senha
+        +string role
         +string status
         +LIMITE_EMPRESTIMOS$ int
-        +criar(nome, email, telefone) bool
+        +login(email, senha) array
+        +criar(nome, email, senha, tel, role) bool
         +listarTodos() array
         +buscarPorId(id) array
-        +atualizar(id, nome, email, telefone, status) bool
+        +atualizar(id, ...) bool
         +deletar(id) bool
         +podeEmprestar(id) bool
         +total() int
@@ -148,12 +98,11 @@ classDiagram
         +string data_emprestimo
         +string data_devolucao
         +bool devolvido
-        +string observacao
         +PRAZO_PADRAO_DIAS$ int
-        +criar(livroId, usuarioId, dataDevolucao, obs) bool
+        +criar(livroId, usuarioId, data, obs) bool
         +listarTodos() array
         +buscarPorId(id) array
-        +atualizar(id, dataDevolucao, obs) bool
+        +atualizar(id, data, obs) bool
         +registrarDevolucao(id) bool
         +deletar(id) bool
         +listarAtrasados() array
@@ -163,49 +112,155 @@ classDiagram
     Livro       "N" --> "1" Categoria : pertence a
     Livro       "N" --> "1" Autor     : escrito por
     Emprestimo  "N" --> "1" Livro     : referencia
-    Emprestimo  "N" --> "1" Usuario   : feito por
+    Emprestimo  "N" --> "1" Usuario   : realizado por
 ```
+
+---
+
+## 🗂️ Estrutura do Projeto
+
+```
+biblioteca/
+├── config/
+│   ├── database.php          # Configuração PDO (não versionado)
+│   ├── database.example.php  # Modelo de configuração
+│   ├── auth.php              # Controle de sessão e roles
+│   └── layout.php            # Funções de interface (header, footer, alertas)
+│
+├── classes/
+│   ├── Categoria.php         # CRUD de categorias
+│   ├── Autor.php             # CRUD de autores
+│   ├── Livro.php             # CRUD de livros + disponibilidade
+│   ├── Usuario.php           # CRUD de usuários + autenticação
+│   └── Emprestimo.php        # CRUD de empréstimos + devolução
+│
+├── pages/
+│   ├── categorias/           # Interface admin: categorias
+│   ├── autores/              # Interface admin: autores
+│   ├── livros/               # Interface admin: livros
+│   ├── usuarios/             # Interface admin: usuários
+│   ├── emprestimos/          # Interface admin: empréstimos
+│   └── usuario/              # Interface do leitor
+│       ├── dashboard.php     # Página inicial do leitor
+│       ├── catalogo.php      # Catálogo com filtros
+│       ├── solicitar.php     # Solicitar empréstimo
+│       └── meus-emprestimos.php # Histórico pessoal
+│
+├── login.php                 # Tela de login
+├── cadastro.php              # Tela de cadastro
+├── logout.php                # Encerrar sessão
+├── index.php                 # Dashboard do administrador
+├── database.sql              # Script completo do banco de dados
+└── setup.php                 # Utilitário de reset de senhas (opcional)
+```
+
+---
+
+## ⚙️ Instalação e Configuração
+
+### Pré-requisitos
+
+- [XAMPP](https://www.apachefriends.org/) (Apache + MySQL) ou equivalente
+- PHP 8.1 ou superior
+- MySQL 8.0 ou MariaDB 10.6+
+
+### Passo a Passo
+
+**1. Clonar o repositório**
+```bash
+git clone <url-do-repositorio>
+```
+Copie a pasta `biblioteca/` para dentro de `C:\xampp\htdocs\`.
+
+**2. Configurar o banco de dados**
+
+Abra o phpMyAdmin (`http://localhost/phpmyadmin`) e execute o arquivo `database.sql`.
+
+Ou via linha de comando:
+```bash
+mysql -u root -p < database.sql
+```
+
+**3. Configurar a conexão**
+
+Copie o arquivo de exemplo e ajuste suas credenciais:
+```bash
+cp config/database.example.php config/database.php
+```
+
+Edite `config/database.php`:
+```php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'biblioteca_db');
+define('DB_USER', 'root');
+define('DB_PASS', '');   // sua senha MySQL (vazio no XAMPP padrão)
+```
+
+**4. Acessar o sistema**
+```
+http://localhost/biblioteca/
+```
+
+---
+
+## 🔑 Usuários Padrão
+
+Criados automaticamente pelo `database.sql`:
+
+| Perfil | E-mail | Senha | Acesso |
+|---|---|---|---|
+| 🛡️ Administrador | `admin@biblioteca.com` | `admin123` | Painel completo |
+| 📚 Leitor | `joao@email.com` | `user123` | Catálogo e empréstimos |
+| 📚 Leitor | `maria@email.com` | `user123` | Catálogo e empréstimos |
 
 ---
 
 ## 📏 Regras de Negócio
 
+### Autenticação e Roles
+- Autenticação via sessão PHP com `password_hash()` / `password_verify()`
+- Role **admin**: gerencia todo o sistema
+- Role **usuario**: visualiza catálogo e solicita empréstimos
+- Páginas protegidas redirecionam para login se não autenticado
+- Admin acessando área de usuário é redirecionado para o painel admin
+
 ### Livros
-- A **quantidade** de exemplares deve ser mínimo **1**.
-- Um livro só pode ser **excluído** se não houver empréstimos ativos vinculados a ele.
-- Antes de registrar um empréstimo, o sistema verifica a **disponibilidade** de exemplares (total cadastrado − exemplares emprestados).
+- Quantidade mínima de **1** exemplar por título
+- Disponibilidade calculada em tempo real: `total − emprestados`
+- Livro não pode ser excluído com empréstimos ativos
 
 ### Usuários
-- O **e-mail** deve ser válido e único no sistema.
-- Um usuário **inativo** não pode realizar novos empréstimos.
-- Cada usuário pode ter no máximo **3 empréstimos simultâneos** (`Usuario::LIMITE_EMPRESTIMOS`).
-- Um usuário só pode ser **excluído** se não tiver empréstimos ativos.
+- E-mail deve ser único e válido
+- Usuário **inativo** não pode realizar empréstimos
+- Limite de **3 empréstimos simultâneos** por leitor
+- Usuário com empréstimos ativos não pode ser excluído
 
 ### Empréstimos
-- O **prazo padrão** de devolução é de **14 dias** (`Emprestimo::PRAZO_PADRAO_DIAS`).
-- A **data de devolução** não pode ser retroativa (anterior ao dia atual).
-- Um empréstimo só pode ser **excluído** após a devolução ser registrada.
-- Empréstimos com prazo vencido e não devolvidos são marcados como **"Em Atraso"** e destacados em vermelho na interface.
+- Prazo padrão de **14 dias**
+- Data de devolução não pode ser retroativa
+- Empréstimos vencidos são sinalizados em vermelho como **"Em Atraso"**
+- Exclusão de empréstimo só permitida após devolução registrada
 
 ### Categorias e Autores
-- Uma categoria ou autor só pode ser **excluído** se não houver livros vinculados a ele (integridade referencial).
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-| Tecnologia       | Uso                                      |
-|------------------|------------------------------------------|
-| PHP 8.1+         | Back-end, orientação a objetos, PDO      |
-| MySQL 8.0        | Banco de dados relacional                |
-| Bootstrap 5.3    | Interface responsiva                     |
-| Bootstrap Icons  | Ícones da interface                      |
-| PDO              | Abstração segura de banco de dados       |
+- Só podem ser excluídos se não houver livros vinculados
 
 ---
 
 ## 🔒 Segurança
 
-- Todas as queries utilizam **prepared statements** (PDO) para prevenir SQL Injection.
-- Saída de dados sempre com `htmlspecialchars()` para prevenir XSS.
-- Validações realizadas tanto no front-end (HTML5) quanto no back-end (PHP).
+- **SQL Injection**: todas as queries usam *prepared statements* via PDO
+- **XSS**: toda saída de dados usa `htmlspecialchars()`
+- **Senhas**: armazenadas com `password_hash(PASSWORD_BCRYPT)`
+- **Controle de acesso**: verificação de sessão em todas as páginas
+
+---
+
+## 📊 Classes e Operações CRUD
+
+| Classe | C | R | U | D | Extra |
+|---|:---:|:---:|:---:|:---:|---|
+| `Categoria` | ✅ | ✅ | ✅ | ✅ | Proteção por vínculo com livros |
+| `Autor` | ✅ | ✅ | ✅ | ✅ | Proteção por vínculo com livros |
+| `Livro` | ✅ | ✅ | ✅ | ✅ | Verificação de disponibilidade |
+| `Usuario` | ✅ | ✅ | ✅ | ✅ | Login, roles, limite de empréstimos |
+| `Emprestimo` | ✅ | ✅ | ✅ | ✅ | Devolução, detecção de atraso |
